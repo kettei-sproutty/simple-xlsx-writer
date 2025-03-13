@@ -1,9 +1,9 @@
-# simple-xlsx (WIP)
+# simple-xlsx-writer (WIP)
 
 ## Usage 
 
 ```ts
-import { Converter } from 'simple-xlsx';
+import { Converter } from 'simple-xlsx-writer';
 
 const headers = [
   { label: "Name", key: "firstName" },

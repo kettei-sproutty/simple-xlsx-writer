@@ -1,7 +1,12 @@
 [package]
-name = "simple-xlsx"
-version = "0.1.0"
+name = "simple-xlsx-writer"
+version = "0.1.1"
 edition = "2024"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/kettei-sproutty/simple-xlsx-writer"
+description = "Simple xlsx writer"
+homepage = "https://kettei-sproutty.itch.io/simple-xlsx-writer"
 
 [lib]
 crate-type = ["cdylib"]
