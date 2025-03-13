@@ -1,0 +1,8 @@
+# Cargo
+/target
+
+# Misc
+.DS_Store
+
+# Website (progress)
+www
