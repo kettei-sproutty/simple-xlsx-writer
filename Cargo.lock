@@ -689,6 +689,7 @@ dependencies = [
  "umya-spreadsheet",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
  "wee_alloc",
 ]
 

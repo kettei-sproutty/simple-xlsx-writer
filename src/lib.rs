@@ -4,18 +4,19 @@ extern crate alloc;
 use console_error_panic_hook::set_once as set_panic_hook;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use web_sys::{BlobPropertyBag, HtmlElement};
 
 #[wasm_bindgen(typescript_custom_section)]
 const IGENERATE_OPTIONS: &'static str = r#"
 interface IGenerateOptions<T = any> {
-    sheetName: string;
-    data: T[];
-    headers: Header[];
+  sheetName: string;
+   data: T[];
+  headers: Header[];
 }
 
 interface Header {
-    key: string;
-    label: string;
+  key: string;
+  label: string;
 }
 "#;
 
@@ -33,7 +34,7 @@ pub struct Header {
 
 #[derive(Serialize, Deserialize)]
 pub struct ConverterOptions {
-  #[serde(rename = "sheetName")]
+  #[serde(rename(deserialize = "sheetName"))]
   sheet_name: Option<alloc::string::String>,
   data: alloc::vec::Vec<serde_json::Value>,
   headers: alloc::vec::Vec<Header>,
@@ -109,5 +110,56 @@ impl Converter {
       .expect("Failed to write workbook");
 
     buffer
+  }
+
+  /// Save the file 
+  pub fn save(&self, name: alloc::string::String) {
+    let buffer = self.data();
+    
+    let uint8_array = web_sys::js_sys::Uint8Array::from(buffer.as_slice());
+
+    let array = web_sys::js_sys::Array::new();
+    array.push(&uint8_array);
+    
+    let blob_properties = BlobPropertyBag::new();
+    blob_properties.set_type(
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    );
+
+    let blob = web_sys::Blob::new_with_u8_array_sequence_and_options(
+      &array,
+      &blob_properties,
+    )
+    .expect("Failed to create blob");
+
+    let url = web_sys::Url::create_object_url_with_blob(&blob)
+      .expect("Failed to create object url");
+
+    let window = web_sys::window().expect("Failed to get window");
+
+    let document = window.document().expect("Failed to get document");
+    let anchor = document.create_element("a").expect("Failed to create anchor");
+
+    anchor.set_attribute("href", &url).expect("Failed to set href");
+    
+    let name = if name.ends_with(".xlsx") {
+      name
+    } else {
+      alloc::format!("{}.xlsx", name)
+    };
+
+    anchor.set_attribute("download", &name).expect("Failed to set download");
+
+    let body = document.body().expect("Failed to get body");
+    body.append_child(&anchor).expect("Failed to append anchor");
+
+   anchor
+      .dyn_ref::<HtmlElement>()
+      .expect("Failed to convert to HtmlElement")
+      .click();
+
+    web_sys::Url::revoke_object_url(&url).expect("Cannot revoke object url");
+
+    body.remove_child(&anchor).expect("Failed to remove anchor");
   }
 }

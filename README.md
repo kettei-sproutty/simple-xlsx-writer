@@ -19,14 +19,22 @@ const data = [
 
 const converter = new Converter();
 converter.append({ headers, data, sheetName: 'People' });
-
-const blob = new Blob([converter.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url;
-a.download = 'data.xlsx';
-a.click();
-URL.revokeObjectURL(url);
+converter.save("people.xlsx");
 ```
+
+This will create an xlsx file with this structure:
+
+| Name | Surname | Age | Country | City     | Address    | Phone       | Email              |
+|------|---------|-----|---------|----------|------------|-------------|--------------------|
+| John | Doe     | 25  | USA     | New York | 123 Street | 123-456-789 | example@gmail.com  |
+| John | Doe     | 25  | USA     | New York | 123 Street | 123-456-789 | example@gmail.com  |
+| John | Doe     | 25  | USA     | New York | 123 Street | 123-456-789 | example@gmail.com  |
+
+## API
+
+| Method       | Return Type   | Details                                |
+|--------------|---------------|----------------------------------------|
+| append       | void          | Synchronously appends a new worksheet. |
+| append_async | Promise<void> | Asynchronously appends a new worksheet.|
+| save         | void          | Saves the xlsx to file.                |
 
