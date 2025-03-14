@@ -112,15 +112,15 @@ impl Converter {
     buffer
   }
 
-  /// Save the file 
+  /// Save the file
   pub fn save(&self, name: alloc::string::String) {
     let buffer = self.data();
-    
+
     let uint8_array = web_sys::js_sys::Uint8Array::from(buffer.as_slice());
 
     let array = web_sys::js_sys::Array::new();
     array.push(&uint8_array);
-    
+
     let blob_properties = BlobPropertyBag::new();
     blob_properties.set_type(
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -141,7 +141,7 @@ impl Converter {
     let anchor = document.create_element("a").expect("Failed to create anchor");
 
     anchor.set_attribute("href", &url).expect("Failed to set href");
-    
+
     let name = if name.ends_with(".xlsx") {
       name
     } else {
@@ -153,7 +153,7 @@ impl Converter {
     let body = document.body().expect("Failed to get body");
     body.append_child(&anchor).expect("Failed to append anchor");
 
-   anchor
+    anchor
       .dyn_ref::<HtmlElement>()
       .expect("Failed to convert to HtmlElement")
       .click();
