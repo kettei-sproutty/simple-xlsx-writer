@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/kettei-sproutty/simple-xlsx-writer"
 description = "Simple xlsx writer"
-homepage = "https://kettei-sproutty.itch.io/simple-xlsx-writer"
+homepage = "https://kettei-sproutty.github.io/simple-xlsx-writer"
 
 [lib]
 crate-type = ["cdylib"]
