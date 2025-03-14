@@ -1,6 +1,10 @@
+#![no_std]
+extern crate alloc;
+
+use alloc::{format,string::String, vec::Vec};
 use wasm_bindgen::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::io::Cursor;
+use console_error_panic_hook::set_once as set_panic_hook;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -18,6 +22,7 @@ pub struct Header {
 #[derive(Serialize, Deserialize)]
 pub struct GenerateOptions {
   /// The name of the sheet in the Excel file, optional.
+  #[serde(rename(deserialize = "sheetName"))]
   pub sheet_name: Option<String>,
   /// The headers of the Excel file.
   pub headers: Vec<Header>,
@@ -34,6 +39,7 @@ pub struct Converter {
 impl Converter {
   #[wasm_bindgen(constructor)]
   pub fn new() -> Self {
+    set_panic_hook();
     let workbook = umya_spreadsheet::new_file_empty_worksheet();
 
     Self {
@@ -84,8 +90,8 @@ impl Converter {
       return Vec::new();
     }
 
-    let mut buffer: Cursor<Vec<u8>> = Cursor::new(Vec::new());
+    let mut buffer: Vec<u8> = Vec::new();
     umya_spreadsheet::writer::xlsx::write_writer(&self.workbook, &mut buffer).expect("Failed to write workbook");
-    buffer.into_inner()
+    buffer
   }
 }

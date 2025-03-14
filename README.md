@@ -17,7 +17,7 @@ const data = [
   { firstName: "Charlie", lastName: "Clark", age: 42 }
 ]
 
-const converter = new Conveter();
+const converter = new Converter();
 converter.append({ headers, data, sheetName: 'People' });
 
 const blob = new Blob([converter.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
