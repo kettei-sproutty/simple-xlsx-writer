@@ -17,6 +17,7 @@ export interface IAppendOptions<T = any> {
 export interface Header {
   key: string;
   label: string;
+  autoWidth?: boolean;
 }
 "#;
 
@@ -40,6 +41,8 @@ extern "C" {
 pub struct Header {
   key: alloc::string::String,
   label: alloc::string::String,
+  #[serde(rename(deserialize = "autoWidth"))]
+  auto_width: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -99,7 +102,8 @@ impl Converter {
     let options: AppendOptions =
       serde_wasm_bindgen::from_value(options.into()).unwrap();
     let sheet_index = self.workbook.get_sheet_count();
-    let mut sheet_name = options.sheet_name.unwrap_or(alloc::format!("Sheet{}", sheet_index + 1));
+    let mut sheet_name =
+      options.sheet_name.unwrap_or(alloc::format!("Sheet{}", sheet_index + 1));
 
     if self.options.fail_on_duplicate {
       if self.workbook.get_sheet_by_name(&sheet_name).is_some() {
@@ -119,7 +123,16 @@ impl Converter {
       self.workbook.new_sheet(sheet_name).expect("Failed to create new sheet");
 
     for (i, header) in options.headers.iter().enumerate() {
-      let coordinates = ((i as u32 + 1), 1);
+      let column = i as u32 + 1;
+      let coordinates = (column, 1);
+      if let Some(auto_width) = header.auto_width {
+        if auto_width {
+          worksheet
+            .get_column_dimension_by_number_mut(&column)
+            .set_auto_width(true);
+        }
+      }
+
       let cell = worksheet.get_cell_mut(coordinates);
 
       cell.set_value_string(&header.label);
