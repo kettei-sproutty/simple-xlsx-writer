@@ -1,10 +1,10 @@
 #![no_std]
 extern crate alloc;
 
-use alloc::{format,string::String, vec::Vec};
-use wasm_bindgen::prelude::*;
-use serde::{Deserialize, Serialize};
+use alloc::{format, string::String, vec::Vec};
 use console_error_panic_hook::set_once as set_panic_hook;
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -49,12 +49,15 @@ impl Converter {
 
   #[wasm_bindgen]
   pub fn append(&mut self, options: JsValue) {
-    let options: GenerateOptions = serde_wasm_bindgen::from_value(options).expect("Failed to parse options");
+    let options: GenerateOptions =
+      serde_wasm_bindgen::from_value(options).expect("Failed to parse options");
 
     let sheet_index = self.workbook.get_sheet_count();
-    let sheet_name = options.sheet_name.unwrap_or(format!("Sheet{}", sheet_index + 1));
-    
-    let worksheet = self.workbook.new_sheet(sheet_name).expect("Failed to create new sheet");
+    let sheet_name =
+      options.sheet_name.unwrap_or(format!("Sheet{}", sheet_index + 1));
+
+    let worksheet =
+      self.workbook.new_sheet(sheet_name).expect("Failed to create new sheet");
 
     for (i, header) in options.headers.iter().enumerate() {
       let coordinates = ((i as u32 + 1), 1);
@@ -72,10 +75,10 @@ impl Converter {
         match value {
           serde_json::Value::String(value) => {
             cell.set_value_string(value);
-          },
+          }
           serde_json::Value::Number(value) => {
             cell.set_value_number(value.as_f64().unwrap_or(0.0));
-          },
+          }
           _ => {
             cell.set_value_string("");
           }
@@ -91,7 +94,9 @@ impl Converter {
     }
 
     let mut buffer: Vec<u8> = Vec::new();
-    umya_spreadsheet::writer::xlsx::write_writer(&self.workbook, &mut buffer).expect("Failed to write workbook");
+    umya_spreadsheet::writer::xlsx::write_writer(&self.workbook, &mut buffer)
+      .expect("Failed to write workbook");
+
     buffer
   }
 }
