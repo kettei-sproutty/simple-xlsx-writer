@@ -1,33 +1,42 @@
 #![no_std]
 extern crate alloc;
 
-use alloc::{format, string::String, vec::Vec};
 use console_error_panic_hook::set_once as set_panic_hook;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-// Define a header structure.
-#[derive(Serialize, Deserialize)]
-pub struct Header {
-  /// The label of the header, which will be displayed in the Excel file.
-  pub label: String,
-  /// The key of the header, which will be used to extract the data from the data object.
-  pub key: String,
+#[wasm_bindgen(typescript_custom_section)]
+const IGENERATE_OPTIONS: &'static str = r#"
+interface IGenerateOptions<T = any> {
+    sheetName: string;
+    data: T[];
+    headers: Header[];
 }
 
-/// Options for generating an XLSX.
+interface Header {
+    key: string;
+    label: string;
+}
+"#;
+
+#[wasm_bindgen]
+extern "C" {
+  #[wasm_bindgen(typescript_type = "IGenerateOptions")]
+  pub type IGenerateOptions;
+}
+
 #[derive(Serialize, Deserialize)]
-pub struct GenerateOptions {
-  /// The name of the sheet in the Excel file, optional.
-  #[serde(rename(deserialize = "sheetName"))]
-  pub sheet_name: Option<String>,
-  /// The headers of the Excel file.
-  pub headers: Vec<Header>,
-  /// The data of the Excel file.
-  pub data: Vec<serde_json::Value>,
+pub struct Header {
+  key: alloc::string::String,
+  label: alloc::string::String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct ConverterOptions {
+  #[serde(rename = "sheetName")]
+  sheet_name: Option<alloc::string::String>,
+  data: alloc::vec::Vec<serde_json::Value>,
+  headers: alloc::vec::Vec<Header>,
 }
 
 #[wasm_bindgen]
@@ -47,14 +56,12 @@ impl Converter {
     }
   }
 
-  #[wasm_bindgen]
-  pub fn append(&mut self, options: JsValue) {
-    let options: GenerateOptions =
-      serde_wasm_bindgen::from_value(options).expect("Failed to parse options");
-
+  pub fn append(&mut self, options: IGenerateOptions) {
+    let options: ConverterOptions =
+      serde_wasm_bindgen::from_value(options.into()).unwrap();
     let sheet_index = self.workbook.get_sheet_count();
     let sheet_name =
-      options.sheet_name.unwrap_or(format!("Sheet{}", sheet_index + 1));
+      options.sheet_name.unwrap_or(alloc::format!("Sheet{}", sheet_index + 1));
 
     let worksheet =
       self.workbook.new_sheet(sheet_name).expect("Failed to create new sheet");
@@ -87,13 +94,17 @@ impl Converter {
     }
   }
 
+  pub async fn append_async(&mut self, options: IGenerateOptions) {
+    self.append(options);
+  }
+
   #[wasm_bindgen(getter)]
-  pub fn data(&self) -> Vec<u8> {
+  pub fn data(&self) -> alloc::vec::Vec<u8> {
     if self.workbook.get_sheet_count() == 0 {
-      return Vec::new();
+      return alloc::vec::Vec::new();
     }
 
-    let mut buffer: Vec<u8> = Vec::new();
+    let mut buffer: alloc::vec::Vec<u8> = alloc::vec::Vec::new();
     umya_spreadsheet::writer::xlsx::write_writer(&self.workbook, &mut buffer)
       .expect("Failed to write workbook");
 
