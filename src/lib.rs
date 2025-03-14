@@ -6,6 +6,14 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 use web_sys::{BlobPropertyBag, HtmlElement};
 
+
+#[wasm_bindgen(typescript_custom_section)]
+const IGENERATE_OPTIONS: &'static str = r#"
+export interface IGenerateOptions {
+  failOnDuplicate?: boolean;
+}
+"#;
+
 #[wasm_bindgen(typescript_custom_section)]
 const IAPPEND_OPTIONS: &'static str = r#"
 export interface IAppendOptions<T = any> {
@@ -18,13 +26,6 @@ export interface Header {
   key: string;
   label: string;
   autoWidth?: boolean;
-}
-"#;
-
-#[wasm_bindgen(typescript_custom_section)]
-const IGENERATE_OPTIONS: &'static str = r#"
-export interface IGenerateOptions {
-  failOnDuplicate: boolean;
 }
 "#;
 
